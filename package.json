@@ -1,0 +1,24 @@
+{
+  "name": "spline-mcp-server",
+  "version": "1.0.0",
+  "description": "An MCP server for working with Spline 3D design tool API",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mcp",
+    "spline",
+    "3d",
+    "design"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/mcp-server": "^0.0.8",
+    "axios": "^1.6.1",
+    "dotenv": "^16.3.1"
+  }
+}
