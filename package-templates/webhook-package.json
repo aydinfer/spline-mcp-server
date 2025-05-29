@@ -1,0 +1,24 @@
+{
+  "name": "spline-webhook-mcp",
+  "version": "1.0.0",
+  "description": "Webhook integration for Spline.design via MCP",
+  "main": "webhook-server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node webhook-server.js"
+  },
+  "keywords": [
+    "spline",
+    "mcp",
+    "webhook",
+    "3d",
+    "design",
+    "claude"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.1.0",
+    "zod": "^3.22.4"
+  }
+}

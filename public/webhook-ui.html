@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spline Webhook Manager</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2563eb;
+            margin-bottom: 30px;
+        }
+        h2 {
+            margin-top: 30px;
+            color: #1f2937;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        .variables-container {
+            margin-top: 10px;
+        }
+        .variable-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .webhook-list {
+            margin-top: 20px;
+        }
+        .webhook-item {
+            background-color: #f9fafb;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #2563eb;
+        }
+        .webhook-url {
+            font-family: monospace;
+            background-color: #f3f4f6;
+            padding: 8px;
+            border-radius: 4px;
+            word-break: break-all;
+        }
+        .webhook-variables {
+            margin-top: 10px;
+        }
+        .test-data {
+            margin-top: 10px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f3f4f6;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Spline Webhook Manager</h1>
+    
+    <div class="container">
+        <div>
+            <div class="card">
+                <h2>Create a Webhook</h2>
+                <form id="create-webhook-form">
+                    <div class="form-group">
+                        <label for="webhook-name">Webhook Name</label>
+                        <input type="text" id="webhook-name" placeholder="e.g., Weather Data Webhook" required>
+                    </div>
+                    
+                    <h3>Variables</h3>
+                    <p>Define variables that will be updated when data is received:</p>
+                    
+                    <div id="variables-container" class="variables-container">
+                        <div class="variable-row">
+                            <input type="text" placeholder="Variable name" class="variable-name">
+                            <select class="variable-type">
+                                <option value="string">String</option>
+                                <option value="number">Number</option>
+                                <option value="boolean">Boolean</option>
+                            </select>
+                            <button type="button" class="remove-variable">✕</button>
+                        </div>
+                    </div>
+                    
+                    <button type="button" id="add-variable">+ Add Variable</button>
+                    
+                    <div class="form-group" style="margin-top: 20px;">
+                        <button type="submit">Create Webhook</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="card">
+                <h2>Send Test Data</h2>
+                <div class="form-group">
+                    <label for="webhook-select">Select Webhook</label>
+                    <select id="webhook-select">
+                        <option value="">-- Select a webhook --</option>
+                    </select>
+                </div>
+                
+                <div id="test-data-container" style="display: none;">
+                    <div class="form-group">
+                        <label for="test-data">JSON Data</label>
+                        <textarea id="test-data" rows="6" placeholder='{"temperature": 25, "humidity": 65}'></textarea>
+                    </div>
+                    
+                    <button type="button" id="send-test-data">Send Data</button>
+                </div>
+            </div>
+        </div>
+        
+        <div>
+            <div class="card">
+                <h2>Your Webhooks</h2>
+                <button id="refresh-webhooks">Refresh</button>
+                <div id="webhook-list" class="webhook-list">
+                    <p>No webhooks found. Create one to get started!</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Results</h2>
+                <div id="result" class="result">
+                    <p>Actions will be displayed here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const createWebhookForm = document.getElementById('create-webhook-form');
+        const webhookNameInput = document.getElementById('webhook-name');
+        const variablesContainer = document.getElementById('variables-container');
+        const addVariableBtn = document.getElementById('add-variable');
+        const webhookList = document.getElementById('webhook-list');
+        const refreshWebhooksBtn = document.getElementById('refresh-webhooks');
+        const webhookSelect = document.getElementById('webhook-select');
+        const testDataContainer = document.getElementById('test-data-container');
+        const testDataInput = document.getElementById('test-data');
+        const sendTestDataBtn = document.getElementById('send-test-data');
+        const resultContainer = document.getElementById('result');
+
+        // Add event listeners
+        createWebhookForm.addEventListener('submit', createWebhook);
+        addVariableBtn.addEventListener('click', addVariableRow);
+        refreshWebhooksBtn.addEventListener('click', fetchWebhooks);
+        webhookSelect.addEventListener('change', handleWebhookSelect);
+        sendTestDataBtn.addEventListener('click', sendTestData);
+
+        // Add first variable row
+        document.querySelector('.remove-variable').addEventListener('click', removeVariableRow);
+
+        // Fetch webhooks on load
+        fetchWebhooks();
+
+        // Functions
+        function addVariableRow() {
+            const row = document.createElement('div');
+            row.className = 'variable-row';
+            row.innerHTML = `
+                <input type="text" placeholder="Variable name" class="variable-name">
+                <select class="variable-type">
+                    <option value="string">String</option>
+                    <option value="number">Number</option>
+                    <option value="boolean">Boolean</option>
+                </select>
+                <button type="button" class="remove-variable">✕</button>
+            `;
+            variablesContainer.appendChild(row);
+            row.querySelector('.remove-variable').addEventListener('click', removeVariableRow);
+        }
+
+        function removeVariableRow(e) {
+            const row = e.target.closest('.variable-row');
+            
+            // Don't remove if it's the last row
+            if (variablesContainer.children.length > 1) {
+                row.remove();
+            }
+        }
+
+        async function createWebhook(e) {
+            e.preventDefault();
+            
+            const name = webhookNameInput.value;
+            if (!name) {
+                alert('Please enter a webhook name');
+                return;
+            }
+            
+            const variables = [];
+            const variableRows = variablesContainer.querySelectorAll('.variable-row');
+            
+            variableRows.forEach(row => {
+                const nameInput = row.querySelector('.variable-name');
+                const typeSelect = row.querySelector('.variable-type');
+                
+                if (nameInput.value) {
+                    variables.push({
+                        name: nameInput.value,
+                        type: typeSelect.value
+                    });
+                }
+            });
+            
+            if (variables.length === 0) {
+                alert('Please add at least one variable');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/create-webhook', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name,
+                        variables
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult(`Webhook created successfully!<br><br>Webhook URL: <code>${data.webhookUrl}</code>`);
+                    webhookNameInput.value = '';
+                    const firstRow = variablesContainer.querySelector('.variable-row');
+                    firstRow.querySelector('.variable-name').value = '';
+                    firstRow.querySelector('.variable-type').value = 'string';
+                    
+                    // Remove all but the first row
+                    const rows = variablesContainer.querySelectorAll('.variable-row');
+                    for (let i = 1; i < rows.length; i++) {
+                        rows[i].remove();
+                    }
+                    
+                    fetchWebhooks();
+                } else {
+                    showResult(`Error: ${data.error}`);
+                }
+            } catch (error) {
+                showResult(`Error: ${error.message}`);
+            }
+        }
+
+        async function fetchWebhooks() {
+            try {
+                const response = await fetch('/webhooks');
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateWebhookList(data.webhooks);
+                    updateWebhookSelect(data.webhooks);
+                } else {
+                    showResult(`Error: ${data.error}`);
+                }
+            } catch (error) {
+                showResult(`Error: ${error.message}`);
+            }
+        }
+
+        function updateWebhookList(webhooks) {
+            if (webhooks.length === 0) {
+                webhookList.innerHTML = '<p>No webhooks found. Create one to get started!</p>';
+                return;
+            }
+            
+            webhookList.innerHTML = '';
+            
+            webhooks.forEach(webhook => {
+                const webhookItem = document.createElement('div');
+                webhookItem.className = 'webhook-item';
+                
+                let variablesHtml = '';
+                if (webhook.variables && webhook.variables.length > 0) {
+                    variablesHtml = '<div class="webhook-variables"><strong>Variables:</strong><ul>';
+                    webhook.variables.forEach(variable => {
+                        variablesHtml += `<li>${variable.name} (${variable.type})</li>`;
+                    });
+                    variablesHtml += '</ul></div>';
+                }
+                
+                webhookItem.innerHTML = `
+                    <h3>${webhook.name}</h3>
+                    <p><strong>URL:</strong></p>
+                    <div class="webhook-url">${webhook.fullUrl}</div>
+                    <p><strong>Created:</strong> ${new Date(webhook.createdAt).toLocaleString()}</p>
+                    ${variablesHtml}
+                `;
+                
+                webhookList.appendChild(webhookItem);
+            });
+        }
+
+        function updateWebhookSelect(webhooks) {
+            webhookSelect.innerHTML = '<option value="">-- Select a webhook --</option>';
+            
+            webhooks.forEach(webhook => {
+                const option = document.createElement('option');
+                option.value = webhook.id;
+                option.textContent = webhook.name;
+                option.dataset.url = webhook.fullUrl;
+                webhookSelect.appendChild(option);
+            });
+        }
+
+        function handleWebhookSelect() {
+            if (webhookSelect.value) {
+                testDataContainer.style.display = 'block';
+                
+                // Find the selected webhook
+                const option = webhookSelect.options[webhookSelect.selectedIndex];
+                const webhookUrl = option.dataset.url;
+                
+                // Generate sample JSON based on variables
+                const sampleJson = {};
+                
+                // Find the webhook in the list
+                const webhookId = webhookSelect.value;
+                fetch('/webhooks')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const webhook = data.webhooks.find(wh => wh.id === webhookId);
+                            if (webhook && webhook.variables) {
+                                webhook.variables.forEach(variable => {
+                                    switch (variable.type) {
+                                        case 'string':
+                                            sampleJson[variable.name] = `Sample text for ${variable.name}`;
+                                            break;
+                                        case 'number':
+                                            sampleJson[variable.name] = Math.floor(Math.random() * 100);
+                                            break;
+                                        case 'boolean':
+                                            sampleJson[variable.name] = Math.random() > 0.5;
+                                            break;
+                                    }
+                                });
+                                testDataInput.value = JSON.stringify(sampleJson, null, 2);
+                            }
+                        }
+                    });
+            } else {
+                testDataContainer.style.display = 'none';
+            }
+        }
+
+        async function sendTestData() {
+            if (!webhookSelect.value) {
+                alert('Please select a webhook');
+                return;
+            }
+            
+            let testData;
+            try {
+                testData = JSON.parse(testDataInput.value);
+            } catch (error) {
+                alert('Invalid JSON data');
+                return;
+            }
+            
+            const option = webhookSelect.options[webhookSelect.selectedIndex];
+            const webhookUrl = option.dataset.url;
+            
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: testDataInput.value
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult(`Data sent successfully!<br><br>Response:<br><pre>${JSON.stringify(data, null, 2)}</pre>`);
+                } else {
+                    showResult(`Error: ${data.error}`);
+                }
+            } catch (error) {
+                showResult(`Error: ${error.message}`);
+            }
+        }
+
+        function showResult(html) {
+            resultContainer.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

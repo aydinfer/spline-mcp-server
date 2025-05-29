@@ -1,0 +1,18 @@
+{
+  "name": "spline-webhook-server",
+  "version": "1.0.0",
+  "description": "Simple Webhook Server for Spline.design",
+  "main": "simple-webhook-server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node simple-webhook-server.js"
+  },
+  "keywords": [
+    "spline",
+    "webhook",
+    "3d",
+    "design"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

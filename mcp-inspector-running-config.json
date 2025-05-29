@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "spline-mcp": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/Users/fer/Desktop/Coder/spline-mcp-server/src/index.js"
+      ]
+    }
+  }
+}
