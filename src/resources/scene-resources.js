@@ -1,4 +1,3 @@
-import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import apiClient from '../utils/api-client.js';
 
 /**
@@ -8,9 +7,9 @@ import apiClient from '../utils/api-client.js';
 export const registerSceneResources = (server) => {
   // Scene resource
   server.resource(
-    'scene',
-    new ResourceTemplate('spline://scene/{sceneId}', { list: 'spline://scenes' }),
-    async (uri, { sceneId }) => {
+    'spline://scene/{sceneId}',
+    async (uri) => {
+      const sceneId = uri.pathname.split('/').pop();
       try {
         const scene = await apiClient.getScene(sceneId);
         
@@ -48,7 +47,6 @@ export const registerSceneResources = (server) => {
 
   // List scenes resource
   server.resource(
-    'scenes',
     'spline://scenes',
     async (uri) => {
       try {
@@ -89,11 +87,11 @@ export const registerSceneResources = (server) => {
 
   // Object resource
   server.resource(
-    'object',
-    new ResourceTemplate('spline://scene/{sceneId}/object/{objectId}', {
-      list: 'spline://scene/{sceneId}/objects'
-    }),
-    async (uri, { sceneId, objectId }) => {
+    'spline://scene/{sceneId}/object/{objectId}',
+    async (uri) => {
+      const parts = uri.pathname.split('/');
+      const sceneId = parts[2];
+      const objectId = parts[4];
       try {
         const object = await apiClient.getObject(sceneId, objectId);
         
@@ -136,9 +134,9 @@ export const registerSceneResources = (server) => {
 
   // List objects resource
   server.resource(
-    'objects',
-    new ResourceTemplate('spline://scene/{sceneId}/objects', { list: undefined }),
-    async (uri, { sceneId }) => {
+    'spline://scene/{sceneId}/objects',
+    async (uri) => {
+      const sceneId = uri.pathname.split('/')[2];
       try {
         const objects = await apiClient.getObjects(sceneId);
         

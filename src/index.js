@@ -39,38 +39,39 @@ import { registerRuntimePrompts } from './prompts/runtime-prompts.js';
  * @param {Object} options - Server configuration options
  */
 async function main(options = {}) {
-  console.log('Starting Spline.design MCP Server...');
-  
+  // Note: console.log statements are commented out to avoid interfering with stdio transport
+  // console.log('Starting Spline.design MCP Server...');
+
   // Load environment variables if config file is specified
   try {
     if (options.config) {
       const configPath = path.resolve(options.config);
-      console.log(`Loading configuration from: ${configPath}`);
+      // console.log(`Loading configuration from: ${configPath}`);
       dotenv.config({ path: configPath });
     } else {
       // Try to load from default locations
       const envPath = path.resolve(process.cwd(), '.env');
       const projectEnvPath = path.resolve(__dirname, '../.env');
-      
+
       if (fs.existsSync(envPath)) {
-        console.log(`Loading configuration from: ${envPath}`);
+        // console.log(`Loading configuration from: ${envPath}`);
         dotenv.config({ path: envPath });
       } else if (fs.existsSync(projectEnvPath)) {
-        console.log(`Loading configuration from: ${projectEnvPath}`);
+        // console.log(`Loading configuration from: ${projectEnvPath}`);
         dotenv.config({ path: projectEnvPath });
       } else {
-        console.log('No .env file found, using environment variables only');
+        // console.log('No .env file found, using environment variables only');
         dotenv.config();
       }
     }
   } catch (error) {
-    console.warn(`Warning: Error loading configuration: ${error.message}`);
-    console.log('Continuing with environment variables only...');
+    // console.warn(`Warning: Error loading configuration: ${error.message}`);
+    // console.log('Continuing with environment variables only...');
   }
 
   // Validate API key
   if (!process.env.SPLINE_API_KEY && options.verbose) {
-    console.warn('\x1b[33m%s\x1b[0m', 'Warning: SPLINE_API_KEY is not set. API calls may fail.');
+    // console.warn('\x1b[33m%s\x1b[0m', 'Warning: SPLINE_API_KEY is not set. API calls may fail.');
   }
 
   // Create a new MCP server instance
@@ -81,7 +82,7 @@ async function main(options = {}) {
   });
 
   // Register tools
-  console.log('Registering tools...');
+  // console.log('Registering tools...');
   
   // Basic tools
   registerObjectTools(server);
@@ -103,25 +104,25 @@ async function main(options = {}) {
   registerRuntimeTools(server);
 
   // Register resources
-  console.log('Registering resources...');
+  // console.log('Registering resources...');
   registerSceneResources(server);
   registerMaterialResources(server);
   registerStateEventResources(server);
 
   // Register prompts
-  console.log('Registering prompts...');
+  // console.log('Registering prompts...');
   registerCreationPrompts(server);
   registerAnimationPrompts(server);
   registerRuntimePrompts(server);
 
   // Set up the transport based on options
   const transportType = options.transport || 'stdio';
-  
+
   if (transportType === 'http') {
     // Set up HTTP transport
     const port = options.port || 3000;
-    
-    console.log(`Setting up HTTP transport on port ${port}...`);
+
+    // console.log(`Setting up HTTP transport on port ${port}...`);
     const app = express();
     app.use(express.json());
     
@@ -166,21 +167,21 @@ async function main(options = {}) {
     
     // Start the HTTP server
     app.listen(port, () => {
-      console.log(`Streamable HTTP server listening on port ${port}`);
+      // console.log(`Streamable HTTP server listening on port ${port}`);
     });
-    
+
     return { server, app };
   } else {
     // Default to stdio transport for Claude Desktop
-    console.log('Setting up stdio transport for Claude Desktop...');
+    // console.log('Setting up stdio transport for Claude Desktop...');
     const transport = new StdioServerTransport();
-    
+
     // Connect the server to the transport
-    console.log('Connecting server to transport...');
+    // console.log('Connecting server to transport...');
     await server.connect(transport);
-    
-    console.log('Server is running and ready to process requests.');
-    
+
+    // console.log('Server is running and ready to process requests.');
+
     return { server, transport };
   }
 }

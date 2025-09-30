@@ -1,4 +1,3 @@
-import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import apiClient from '../utils/api-client.js';
 
 /**
@@ -8,11 +7,11 @@ import apiClient from '../utils/api-client.js';
 export const registerMaterialResources = (server) => {
   // Material resource
   server.resource(
-    'material',
-    new ResourceTemplate('spline://scene/{sceneId}/material/{materialId}', {
-      list: 'spline://scene/{sceneId}/materials'
-    }),
-    async (uri, { sceneId, materialId }) => {
+    'spline://scene/{sceneId}/material/{materialId}',
+    async (uri) => {
+      const parts = uri.pathname.split('/');
+      const sceneId = parts[2];
+      const materialId = parts[4];
       try {
         const material = await apiClient.getMaterial(sceneId, materialId);
         
@@ -50,9 +49,9 @@ export const registerMaterialResources = (server) => {
 
   // List materials resource
   server.resource(
-    'materials',
-    new ResourceTemplate('spline://scene/{sceneId}/materials', { list: undefined }),
-    async (uri, { sceneId }) => {
+    'spline://scene/{sceneId}/materials',
+    async (uri) => {
+      const sceneId = uri.pathname.split('/')[2];
       try {
         const materials = await apiClient.getMaterials(sceneId);
         

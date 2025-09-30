@@ -1,4 +1,3 @@
-import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import apiClient from '../utils/api-client.js';
 
 /**
@@ -8,11 +7,11 @@ import apiClient from '../utils/api-client.js';
 export const registerStateEventResources = (server) => {
   // State resource
   server.resource(
-    'state',
-    new ResourceTemplate('spline://scene/{sceneId}/state/{stateId}', {
-      list: 'spline://scene/{sceneId}/states'
-    }),
-    async (uri, { sceneId, stateId }) => {
+    'spline://scene/{sceneId}/state/{stateId}',
+    async (uri) => {
+      const parts = uri.pathname.split('/');
+      const sceneId = parts[2];
+      const stateId = parts[4];
       try {
         const state = await apiClient.getState(sceneId, stateId);
         
@@ -54,9 +53,9 @@ export const registerStateEventResources = (server) => {
 
   // List states resource
   server.resource(
-    'states',
-    new ResourceTemplate('spline://scene/{sceneId}/states', { list: undefined }),
-    async (uri, { sceneId }) => {
+    'spline://scene/{sceneId}/states',
+    async (uri) => {
+      const sceneId = uri.pathname.split('/')[2];
       try {
         const states = await apiClient.getStates(sceneId);
         
@@ -93,11 +92,11 @@ export const registerStateEventResources = (server) => {
 
   // Event resource
   server.resource(
-    'event',
-    new ResourceTemplate('spline://scene/{sceneId}/event/{eventId}', {
-      list: 'spline://scene/{sceneId}/events'
-    }),
-    async (uri, { sceneId, eventId }) => {
+    'spline://scene/{sceneId}/event/{eventId}',
+    async (uri) => {
+      const parts = uri.pathname.split('/');
+      const sceneId = parts[2];
+      const eventId = parts[4];
       try {
         const event = await apiClient.getEvent(sceneId, eventId);
         
@@ -139,9 +138,9 @@ export const registerStateEventResources = (server) => {
 
   // List events resource
   server.resource(
-    'events',
-    new ResourceTemplate('spline://scene/{sceneId}/events', { list: undefined }),
-    async (uri, { sceneId }) => {
+    'spline://scene/{sceneId}/events',
+    async (uri) => {
+      const sceneId = uri.pathname.split('/')[2];
       try {
         const events = await apiClient.getEvents(sceneId);
         
