@@ -34,26 +34,53 @@ This server provides comprehensive integration with Spline.design 3D scenes thro
   - Build real-time data visualizations
   - Connect with services like Zapier, IFTTT, n8n, or custom APIs
 
+## API Keys
+
+### Spline API Key (required)
+
+1. Log in at [spline.design](https://spline.design)
+2. Go to your account settings
+3. Navigate to the API section and generate a key
+
 ## Installation
 
-### Option 1: Install and run locally
+### Option 1: Using npx (easiest for Claude Desktop)
+
+Add this to your Claude Desktop MCP config:
+
+```json
+{
+  "mcpServers": {
+    "spline": {
+      "command": "npx",
+      "args": ["-y", "spline-mcp-server"],
+      "env": {
+        "SPLINE_API_KEY": "YOUR_SPLINE_API_KEY_HERE"
+      }
+    }
+  }
+}
+```
+
+### Option 2: Install and run locally
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/spline-mcp-server.git
+git clone https://github.com/aydinfer/spline-mcp-server.git
 cd spline-mcp-server
 
 # Install dependencies
 npm install
 
 # Configure environment variables
-cp config/.env.example .env
+cp .env.example .env
+# Edit .env and add your API keys
 
 # Start the server in MCP mode (for Claude Desktop)
 npm start
 ```
 
-### Option 2: Run different server modes
+### Option 3: Run different server modes
 
 ```bash
 # Start in MCP mode (default)

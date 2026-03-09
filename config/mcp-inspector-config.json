@@ -6,8 +6,7 @@
         "src/index.js"
       ],
       "env": {
-        "SPLINE_API_KEY": "your_spline_api_key_here",
-        "OPENAI_API_KEY": "your_openai_api_key_here"
+        "SPLINE_API_KEY": "your_spline_api_key_here"
       }
     }
   }
