@@ -3,7 +3,7 @@
     "spline-mcp": {
       "command": "node",
       "args": [
-        "/Users/fer/Desktop/Coder/spline-mcp-server/src/index.js"
+        "src/index.js"
       ],
       "env": {
         "SPLINE_API_KEY": "your_spline_api_key_here",
