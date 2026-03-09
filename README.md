@@ -1,50 +1,38 @@
-# Spline.design Integration Server
+# Spline.design MCP Server
 
-This server provides comprehensive integration with Spline.design 3D scenes through multiple modes:
+> **Work in Progress** — This project is under active development. See the [Current Status](#current-status) section below.
 
-1. **MCP Server** - Full Model Context Protocol integration for Claude Desktop
-2. **Webhook Server** - Standalone webhook support for data-driven visualizations
-3. **Minimal Server** - Lightweight option with essential functionality
+An MCP (Model Context Protocol) server for [Spline.design](https://spline.design) that helps you generate code for controlling 3D scenes using the `@splinetool/runtime` library.
 
-## Features
+## Current Status
 
-- **Comprehensive 3D Object Management**
-  - Create, modify, and delete any 3D object
-  - Control positioning, rotation, scaling, and visibility
-  - Generate runtime code for object interactions
+Spline.design does **not** provide a public REST API for programmatic scene manipulation. Their developer tools consist of:
 
-- **Runtime API Integration**
-  - Direct integration with `@splinetool/runtime` for programmatic control
-  - Generate ready-to-use JavaScript, React, and Next.js code
-  - Create interactive animations and behaviors
-  - Implement custom event handling and scene manipulation
+- **[Code API](https://docs.spline.design/exporting-your-scene/web/code-api-for-web)** — A client-side JavaScript runtime (`@splinetool/runtime`) for controlling exported scenes in the browser
+- **[Real-time API](https://docs.spline.design/interaction-states-events-and-actions/real-time-api)** — A feature inside the Spline editor for connecting scenes to external APIs (outbound calls from Spline, not inbound)
 
-- **Advanced Material System**
-  - Create layered materials with extensive customization
-  - Support for all Spline material types and properties
-  - Configure complex shading options
+### What works today
 
-- **Complete Event & Action System**
-  - Support for 20+ event types (mouse, keyboard, physics, etc.)
-  - Implementation of 15+ action types
-  - Create complex event chains and conditional logic
+The **code generation tools** work and are useful — they generate ready-to-use JavaScript, React, and Next.js code for the `@splinetool/runtime`:
 
-- **Webhook Integration**
-  - Create webhooks to receive external data
-  - Build real-time data visualizations
-  - Connect with services like Zapier, IFTTT, n8n, or custom APIs
+- `getRuntimeSetup` — Setup instructions for the runtime package
+- `generateComprehensiveExample` — Full working code examples
+- `generateAnimationCode` — Animation code (rotate, move, scale, color with easing)
+- `generateSceneInteractionCode` — Interaction patterns (explore, events, variables, camera, physics)
+- `generateReactComponent` — React/TypeScript components
+- `generateObjectCode` — Object interaction code
+- `generateEventListenerCode` — Event listener code
+- `exportSceneCode` — Export code in vanilla/React/Next.js formats
+- `generateEmbedCode` — Iframe embed code
+- `generateVariableCode` — Variable manipulation code
 
-## API Keys
+### What doesn't work yet
 
-### Spline API Key (required)
-
-1. Log in at [spline.design](https://spline.design)
-2. Go to your account settings
-3. Navigate to the API section and generate a key
+The remaining ~130 tools (object CRUD, materials, events, actions, design tools, etc.) call a REST API at `api.spline.design` that **does not exist**. These tools will fail with network errors if called. They represent the intended future architecture if Spline ever releases a public API.
 
 ## Installation
 
-### Option 1: Using npx (easiest for Claude Desktop)
+### Using npx (for Claude Desktop)
 
 Add this to your Claude Desktop MCP config:
 
@@ -53,141 +41,76 @@ Add this to your Claude Desktop MCP config:
   "mcpServers": {
     "spline": {
       "command": "npx",
-      "args": ["-y", "spline-mcp-server"],
-      "env": {
-        "SPLINE_API_KEY": "YOUR_SPLINE_API_KEY_HERE"
-      }
+      "args": ["-y", "spline-mcp-server"]
     }
   }
 }
 ```
 
-### Option 2: Install and run locally
+### Local development
 
 ```bash
-# Clone the repository
 git clone https://github.com/aydinfer/spline-mcp-server.git
 cd spline-mcp-server
-
-# Install dependencies
 npm install
-
-# Configure environment variables
-cp .env.example .env
-# Edit .env and add your API keys
-
-# Start the server in MCP mode (for Claude Desktop)
 npm start
 ```
 
-### Option 3: Run different server modes
+## What you can do with it
 
-```bash
-# Start in MCP mode (default)
-node bin/cli.js --mode mcp
+Ask Claude to generate Spline runtime code for your projects:
 
-# Start in webhook mode
-node bin/cli.js --mode webhook
+- "Generate a React component that loads my Spline scene and adds click handlers to objects"
+- "Write animation code that rotates an object on hover"
+- "Create an interactive scene with variable-based state management"
+- "Generate Next.js code with Spline integration"
 
-# Start in minimal mode
-node bin/cli.js --mode minimal
-```
+Claude will use the code generation tools to produce working `@splinetool/runtime` code you can use directly in your web projects.
 
-## Command-Line Options
+## Spline Runtime API Reference
 
-The server supports various command-line options through the unified CLI:
+The `@splinetool/runtime` provides these methods (which the code generation tools target):
 
-```bash
-# Get help
-node bin/cli.js --help
+| Method | Description |
+|---|---|
+| `findObjectByName(name)` | Find an object by name |
+| `findObjectById(uuid)` | Find an object by ID |
+| `getAllObjects()` | List all scene objects |
+| `emitEvent(event, nameOrUuid)` | Trigger an event on an object |
+| `addEventListener(event, cb)` | Listen for scene events |
+| `setVariable(name, value)` | Set a scene variable |
+| `getVariable(name)` | Get a scene variable |
+| `setZoom(value)` | Control zoom level |
+| `play()` / `stop()` | Control rendering |
 
-# MCP mode with HTTP transport
-node bin/cli.js --mode mcp --transport http --port 3000
-
-# MCP mode with stdio transport (for Claude Desktop)
-node bin/cli.js --mode mcp --transport stdio
-
-# Webhook server mode
-node bin/cli.js --mode webhook --port 3000
-```
+Objects expose `position`, `rotation`, `scale`, `visible`, and `intensity` properties.
 
 ## Project Structure
 
 ```
 spline-mcp-server/
-├── bin/                   # Executable scripts
-│   └── cli.js             # Unified CLI entry point
-├── config/                # Configuration files
-│   ├── .env.example       # Environment variables template
-│   └── *.json             # JSON configuration files
-├── docs/                  # Documentation
-│   ├── INSTALLATION.md    # Installation guide
-│   ├── USAGE_GUIDE.md     # Usage instructions
-│   └── WEBHOOK_GUIDE.md   # Webhook specific guide
-├── examples/              # Example usage patterns
-├── package-templates/     # Package.json templates for different modes
-├── public/                # Web assets
-│   └── webhook-ui.html    # Webhook UI interface
-├── scripts/               # Shell scripts
-│   ├── install.sh         # Installation script
-│   └── test-*.sh          # Testing scripts
-├── src/                   # Source code
+├── src/
+│   ├── tools/             # MCP tool implementations
+│   │   └── design/        # Advanced design tools (pending API)
+│   ├── utils/             # API client and runtime manager
 │   ├── prompts/           # Prompt templates
 │   ├── resources/         # MCP resources
-│   ├── tools/             # MCP tools
-│   ├── utils/             # Utility functions
-│   └── index.js           # Main MCP entry point
-├── minimal.js             # Minimal server implementation
-├── simple-webhook-server.js # Standalone webhook server
-├── LICENSE                # License file
-├── README.md              # Project readme
-└── package.json           # Unified package file
+│   └── index.js           # Main server entry point
+├── bin/cli.js             # CLI entry point
+├── docs/                  # Documentation
+└── package.json
 ```
-
-## Using with Claude Desktop
-
-This server is designed to work with Claude Desktop in MCP mode:
-
-1. Start the server in MCP mode with stdio transport:
-   ```bash
-   node bin/cli.js --mode mcp --transport stdio
-   ```
-
-2. In Claude Desktop, access the MCP connection settings
-3. Connect to the server
-4. Start interacting with Spline.design through Claude
-
-## Using Webhook Mode
-
-The webhook server provides a simple web interface for creating and testing webhooks:
-
-1. Start the server in webhook mode:
-   ```bash
-   node bin/cli.js --mode webhook
-   ```
-
-2. Open the web interface at http://localhost:3000
-3. Create a webhook and obtain its URL
-4. In Spline.design, configure the webhook in the Variables & Data Panel
-5. Send test data to see your scene update in real-time
-
-## Examples
-
-See the `examples/` directory for sample usage patterns and common workflows.
-
-## Documentation
-
-For detailed documentation, see the files in the `docs/` directory:
-
-- [Installation Guide](docs/INSTALLATION.md)
-- [Usage Guide](docs/USAGE_GUIDE.md)
-- [Webhook Guide](docs/WEBHOOK_GUIDE.md)
-- [Testing Guide](docs/TEST_CASES.md)
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Areas that would be especially valuable:
+
+- **Browser automation approach** — Using Puppeteer/Playwright to control Spline scenes via the runtime API
+- **Spline plugin/extension** — If Spline releases a plugin system or REST API
+- **Improved code generation** — More templates and patterns for common use cases
+
+Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.

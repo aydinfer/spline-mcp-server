@@ -187,7 +187,8 @@ async function main(options = {}) {
 }
 
 // If this module is run directly, start the server
-if (import.meta.url === import.meta.resolve(process.argv[1])) {
+const isMainModule = process.argv[1] && import.meta.url === `file://${path.resolve(process.argv[1])}`;
+if (isMainModule) {
   main().catch(error => {
     console.error('Error starting server:', error);
     process.exit(1);

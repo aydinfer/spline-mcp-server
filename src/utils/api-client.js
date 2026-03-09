@@ -264,4 +264,29 @@ export class SplineApiClient {
   }
 }
 
-export default new SplineApiClient();
+const apiClient = new SplineApiClient();
+
+/**
+ * Fetch from the Spline API using a fetch-like interface
+ * @param {string} endpoint - API endpoint
+ * @param {object} options - Fetch-like options (method, body)
+ * @returns {Promise<object>} - API response
+ */
+export async function fetchFromSplineApi(endpoint, options = {}) {
+  const method = (options.method || 'GET').toUpperCase();
+  const data = options.body ? JSON.parse(options.body) : undefined;
+  return apiClient.request(method, endpoint, data);
+}
+
+/**
+ * Update a Spline object's properties
+ * @param {string} sceneId - Scene ID
+ * @param {string} objectId - Object ID
+ * @param {object} properties - Properties to update
+ * @returns {Promise<object>} - Updated object
+ */
+export async function updateSplineObject(sceneId, objectId, properties) {
+  return apiClient.request('PUT', `/scenes/${sceneId}/objects/${objectId}`, properties);
+}
+
+export default apiClient;
